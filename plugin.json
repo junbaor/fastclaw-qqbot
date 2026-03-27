@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "QQ Bot channel for FastClaw via official QQ Bot API. Supports C2C (private), group, and guild messages.",
   "type": "channel",
-  "command": "node plugin.mjs",
+  "command": "./qqbot",
   "capabilities": ["channel"],
   "config": {
     "appId": {
