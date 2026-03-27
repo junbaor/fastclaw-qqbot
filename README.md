@@ -1,6 +1,11 @@
-# FastClaw QQ Bot Plugin
+# FastClaw QQ 机器人插件
 
-QQ Bot channel plugin for [FastClaw](https://github.com/fastclaw-ai/fastclaw), using the official [QQ Bot API](https://bot.q.qq.com/wiki/).
+[![Go](https://img.shields.io/badge/Go-1.24-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![GitHub Release](https://img.shields.io/github/v/release/junbaor/fastclaw-qqbot)](https://github.com/junbaor/fastclaw-qqbot/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/junbaor/fastclaw-qqbot/release.yml?label=构建)](https://github.com/junbaor/fastclaw-qqbot/actions)
+
+[FastClaw](https://github.com/fastclaw-ai/fastclaw) 的 QQ 机器人通道插件，基于官方 [QQ 机器人 API](https://bot.q.qq.com/wiki/) 实现。
 
 ## 安装
 
@@ -70,12 +75,13 @@ mkdir -p ~/.fastclaw/plugins/qqbot
 # 同时下载 plugin.json 放入同一目录
 ```
 
-4. 编辑 `~/.fastclaw/fastclaw.json`：
+4. 编辑 `~/.fastclaw/fastclaw.json`，添加插件配置和 binding：
 
 ```json
 {
   "plugins": {
     "enabled": true,
+    "paths": ["~/.fastclaw/plugins"],
     "entries": {
       "qqbot": {
         "enabled": true,
@@ -85,19 +91,25 @@ mkdir -p ~/.fastclaw/plugins/qqbot
         }
       }
     }
-  }
+  },
+  "bindings": [
+    {
+      "agentId": "default",
+      "match": { "channel": "qqbot" }
+    }
+  ]
 }
 ```
 
-## Supported Message Types
+## 支持的消息类型
 
-| Type | Event | chatId Format |
-|------|-------|---------------|
-| C2C Private | `C2C_MESSAGE_CREATE` | `c2c:{user_openid}` |
-| Group (@bot) | `GROUP_AT_MESSAGE_CREATE` | `group:{group_openid}` |
-| Group (plain) | `GROUP_MESSAGE_CREATE` | `group:{group_openid}` |
-| Guild Channel | `AT_MESSAGE_CREATE` | `channel:{channel_id}` |
-| Guild DM | `DIRECT_MESSAGE_CREATE` | `dm:{guild_id}` |
+| 类型 | 事件 | chatId 格式 |
+|------|------|-------------|
+| 单聊（C2C） | `C2C_MESSAGE_CREATE` | `c2c:{user_openid}` |
+| 群聊（@机器人） | `GROUP_AT_MESSAGE_CREATE` | `group:{group_openid}` |
+| 群聊（普通消息） | `GROUP_MESSAGE_CREATE` | `group:{group_openid}` |
+| 频道消息 | `AT_MESSAGE_CREATE` | `channel:{channel_id}` |
+| 频道私信 | `DIRECT_MESSAGE_CREATE` | `dm:{guild_id}` |
 
 ## 附件处理
 
@@ -135,7 +147,7 @@ mkdir -p ~/.fastclaw/plugins/qqbot
 | 视频 | 传递 URL（`[视频: URL]`） |
 | 其他文件 | 传递文件名和 URL（`[文件: name URL]`） |
 
-## Logs
+## 日志
 
 运行日志写入 `~/.fastclaw/logs/qqbot.log`，每天自动滚动为 `qqbot-YYYY-MM-DD.log`。
 
