@@ -57,8 +57,16 @@ esac
 echo "==> Platform: ${OS}/${ARCH}"
 mkdir -p "$PLUGIN_DIR"
 
-DOWNLOAD_BASE="https://github.com/${GITHUB_REPO}/releases/latest/download"
 BINARY_NAME="qqbot-${OS}-${ARCH}"
+
+echo "==> Fetching latest version..."
+VERSION="$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" | grep '"tag_name"' | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')"
+if [[ -z "$VERSION" ]]; then
+  echo "Error: Failed to fetch latest version"; exit 1
+fi
+echo "==> Latest version: ${VERSION}"
+
+DOWNLOAD_BASE="https://github.com/${GITHUB_REPO}/releases/download/${VERSION}"
 
 echo "==> Downloading binary..."
 curl -fsSL "${DOWNLOAD_BASE}/${BINARY_NAME}" -o "${PLUGIN_DIR}/qqbot"
@@ -66,6 +74,11 @@ chmod +x "${PLUGIN_DIR}/qqbot"
 
 echo "==> Downloading plugin.json..."
 curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPO}/master/plugin.json" -o "${PLUGIN_DIR}/plugin.json"
+
+# Update version in plugin.json to match the downloaded release
+CLEAN_VERSION="${VERSION#v}"
+sed -i.bak "s/\"version\":.*\"[^\"]*\"/\"version\": \"${CLEAN_VERSION}\"/" "${PLUGIN_DIR}/plugin.json"
+rm -f "${PLUGIN_DIR}/plugin.json.bak"
 
 if [[ "$UPGRADE" == "true" ]]; then
   echo ""

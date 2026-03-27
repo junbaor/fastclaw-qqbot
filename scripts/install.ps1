@@ -45,8 +45,17 @@ $arch = if ([Environment]::Is64BitOperatingSystem) {
 Write-Host "==> Platform: windows/$arch"
 New-Item -ItemType Directory -Force -Path $PLUGIN_DIR | Out-Null
 
-$downloadBase = "https://github.com/$GITHUB_REPO/releases/latest/download"
 $binaryName = "qqbot-windows-$arch.exe"
+
+Write-Host "==> Fetching latest version..."
+$releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$GITHUB_REPO/releases/latest" -UseBasicParsing
+$version = $releaseInfo.tag_name
+if (-not $version) {
+    Write-Host "Error: Failed to fetch latest version"; exit 1
+}
+Write-Host "==> Latest version: $version"
+
+$downloadBase = "https://github.com/$GITHUB_REPO/releases/download/$version"
 
 Write-Host "==> Downloading binary..."
 Invoke-WebRequest -Uri "$downloadBase/$binaryName" -OutFile (Join-Path $PLUGIN_DIR "qqbot.exe") -UseBasicParsing
@@ -54,8 +63,11 @@ Invoke-WebRequest -Uri "$downloadBase/$binaryName" -OutFile (Join-Path $PLUGIN_D
 Write-Host "==> Downloading plugin.json..."
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$GITHUB_REPO/master/plugin.json" -OutFile (Join-Path $PLUGIN_DIR "plugin.json") -UseBasicParsing
 
+# Update version in plugin.json to match the downloaded release
+$cleanVersion = $version -replace "^v", ""
 $pluginJsonPath = Join-Path $PLUGIN_DIR "plugin.json"
 $pluginJson = Get-Content $pluginJsonPath -Raw | ConvertFrom-Json
+$pluginJson.version = $cleanVersion
 $pluginJson.command = ".\qqbot.exe"
 $pluginJson | ConvertTo-Json -Depth 10 | Set-Content $pluginJsonPath -Encoding UTF8
 
